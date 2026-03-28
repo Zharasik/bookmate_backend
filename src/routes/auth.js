@@ -33,9 +33,8 @@ router.post('/register', async (req, res) => {
     logger.info('User registered', { email: user.email });
     res.status(201).json({ token: signToken(user.id, user.role), user });
   } catch (e) {
-    const detail = logger.errorDetail(e);
-    logger.error('Register error', { error: detail, stack: e.stack });
-    res.status(500).json({ error: 'Ошибка сервера: ' + detail });
+    logger.error('Register error', { error: e.message });
+    res.status(500).json({ error: 'Ошибка сервера: ' + e.message });
   }
 });
 
@@ -60,12 +59,12 @@ router.post('/register-owner', async (req, res) => {
     logger.info('Owner registered', { email: user.email });
     res.status(201).json({ token: signToken(user.id, user.role), user });
   } catch (e) {
-    const detail = logger.errorDetail(e);
-    logger.error('Owner register error', { error: detail, stack: e.stack });
-    res.status(500).json({ error: 'Ошибка сервера: ' + detail });
+    logger.error('Owner register error', { error: e.message });
+    res.status(500).json({ error: 'Ошибка сервера: ' + e.message });
   }
 });
 
+// ─── LOGIN ───────────────────────────────────────────
 router.post('/login', async (req, res) => {
   try {
     const err = requireFields(req.body, ['email', 'password']);
@@ -88,6 +87,7 @@ router.post('/login', async (req, res) => {
   } catch (e) { logger.error('Login error', { error: e.message }); res.status(500).json({ error: 'Ошибка сервера' }); }
 });
 
+// ─── GET ME ──────────────────────────────────────────
 router.get('/me', auth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -98,6 +98,7 @@ router.get('/me', auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'Ошибка сервера' }); }
 });
 
+// ─── UPDATE ME ───────────────────────────────────────
 router.put('/me', auth, async (req, res) => {
   try {
     const { name, phone, avatar_url } = req.body;

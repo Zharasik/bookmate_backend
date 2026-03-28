@@ -2,7 +2,9 @@ services:
   - type: web
     name: bookmate-api
     runtime: node
-    buildCommand: npm install && npm run db:init
+    # db:init не в build: при ошибке БД сборка падает и остаётся старый деплой.
+    # Схему БД один раз: локально или в Shell Render — npm run db:init
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: DATABASE_URL
