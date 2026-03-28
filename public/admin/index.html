@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>BookMate — Админ-панель</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#252836;--border:#2e3144;--text:#f0f0f5;--text2:#a0a3b1;--text3:#6b6e7d;--accent:#6366f1;--accent2:#818cf8;--accent-bg:rgba(99,102,241,.12);--green:#22c55e;--green-bg:rgba(34,197,94,.12);--red:#ef4444;--red-bg:rgba(239,68,68,.12);--orange:#f59e0b;--orange-bg:rgba(245,158,11,.12);--radius:12px;--radius-sm:8px}
+body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+a{color:var(--accent2);text-decoration:none}
+
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:420px;text-align:center}
+.login-box h1{font-size:28px;font-weight:800;margin-bottom:6px}
+.login-box h1 span{color:var(--accent)}
+.login-box .sub{color:var(--text2);margin-bottom:24px;font-size:14px}
+.login-box input{width:100%;height:48px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 16px;color:var(--text);font-size:15px;margin-bottom:12px;font-family:inherit}
+.login-box input:focus{outline:none;border-color:var(--accent)}
+.login-box .btn-main{width:100%;height:48px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;font-family:inherit}
+.login-box .btn-main:hover{background:var(--accent2)}
+.login-err{color:var(--red);font-size:13px;margin-bottom:12px;min-height:18px}
+.tabs-row{display:flex;margin-bottom:20px;gap:0;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.tab-btn{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface2);color:var(--text3);transition:.15s}
+.tab-btn.active{background:var(--accent);color:#fff}
+.switch-link{margin-top:16px;font-size:13px;color:var(--text3)}.switch-link a{color:var(--accent2);cursor:pointer}
+
+#app{display:none}.shell{display:flex;min-height:100vh}
+.sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.sidebar-logo{padding:24px;font-size:22px;font-weight:800;letter-spacing:-.5px;border-bottom:1px solid var(--border)}.sidebar-logo span{color:var(--accent)}
+.sidebar-nav{flex:1;padding:12px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radius-sm);cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);transition:.15s}
+.nav-item:hover{background:var(--surface2);color:var(--text)}.nav-item.active{background:var(--accent-bg);color:var(--accent2);font-weight:600}
+.sidebar-footer{padding:16px;border-top:1px solid var(--border)}
+.sidebar-footer .user-info{font-size:13px;color:var(--text2);margin-bottom:8px}.sidebar-footer .user-info strong{color:var(--text);display:block}
+.sidebar-footer .role-badge{display:inline-block;font-size:10px;background:var(--orange-bg);color:var(--orange);padding:2px 8px;border-radius:10px;font-weight:700;margin-top:4px}
+.btn-logout{background:none;border:1px solid var(--border);color:var(--text2);border-radius:var(--radius-sm);padding:8px 16px;cursor:pointer;font-size:13px;font-family:inherit;width:100%;margin-top:8px}
+.btn-logout:hover{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+
+.main{flex:1;margin-left:260px;padding:32px}
+.page-title{font-size:26px;font-weight:800;margin-bottom:24px;letter-spacing:-.5px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.stat-card .label{font-size:13px;color:var(--text3);margin-bottom:8px;font-weight:500}.stat-card .value{font-size:28px;font-weight:800}
+
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}.table-header h3{font-size:16px;font-weight:700}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px 20px;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);background:var(--surface2)}
+td{padding:14px 20px;font-size:14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.badge-green{background:var(--green-bg);color:var(--green)}.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-blue{background:var(--accent-bg);color:var(--accent2)}.badge-orange{background:var(--orange-bg);color:var(--orange)}
+.thumb{width:40px;height:40px;border-radius:var(--radius-sm);object-fit:cover}
+
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:.15s}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent2)}
+.btn-danger{background:var(--red-bg);color:var(--red)}.btn-danger:hover{background:var(--red);color:#fff}
+.btn-sm{padding:6px 10px;font-size:12px}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text2)}.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.actions{display:flex;gap:6px}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:200}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:28px}
+.modal h2{font-size:20px;font-weight:700;margin-bottom:20px}
+.form-group{margin-bottom:16px}.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;height:44px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 14px;color:var(--text);font-size:14px;font-family:inherit}
+.form-group input[type="file"]{padding:10px 14px;height:auto}
+.form-group textarea{height:80px;padding:12px 14px;resize:vertical}
+.form-group input:focus,.form-group textarea:focus{outline:none;border-color:var(--accent)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.empty-msg{text-align:center;padding:40px;color:var(--text3);font-size:14px}
+.img-preview{width:80px;height:80px;border-radius:var(--radius-sm);object-fit:cover;margin-top:8px}
+
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.stats-grid{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN / REGISTER ═══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Book<span>Mate</span></h1>
+    <p class="sub">Панель управления бизнесом</p>
+    <div class="tabs-row">
+      <div class="tab-btn active" id="tab-login" onclick="switchTab('login')">Вход</div>
+      <div class="tab-btn" id="tab-register" onclick="switchTab('register')">Регистрация бизнеса</div>
+    </div>
+    <div class="login-err" id="login-error"></div>
+    <!-- Login form -->
+    <div id="form-login">
+      <input type="email" id="l-email" placeholder="Email">
+      <input type="password" id="l-pass" placeholder="Пароль">
+      <button class="btn-main" onclick="doLogin()">Войти</button>
+    </div>
+    <!-- Register form -->
+    <div id="form-register" style="display:none">
+      <input id="r-name" placeholder="Ваше имя">
+      <input id="r-biz" placeholder="Название бизнеса">
+      <input type="email" id="r-email" placeholder="Email">
+      <input type="password" id="r-pass" placeholder="Пароль (мин. 4 символа)">
+      <button class="btn-main" onclick="doRegister()">Создать бизнес-аккаунт</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app"><div class="shell">
+<aside class="sidebar">
+  <div class="sidebar-logo">Book<span>Mate</span></div>
+  <nav class="sidebar-nav" id="nav"></nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><strong id="admin-name"></strong><span id="admin-email"></span><br><span class="role-badge" id="admin-role"></span></div>
+    <button class="btn-logout" onclick="doLogout()">Выйти</button>
+  </div>
+</aside>
+<main class="main" id="mc"></main>
+</div></div>
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()"><div class="modal" id="modal-body"></div></div>
+
+<script>
+let TOKEN=localStorage.getItem('admin_token')||'',USER=JSON.parse(localStorage.getItem('admin_user')||'null'),VENUES=[],ROLE='';
+const API=location.origin;
+
+async function apiFetch(p,o={}){
+  const h={'Content-Type':'application/json'};if(TOKEN)h.Authorization='Bearer '+TOKEN;
+  const r=await fetch(API+p,{...o,headers:{...h,...(o.headers||{})}});const d=await r.json();
+  if(!r.ok)throw new Error(d.error||'Ошибка');return d;
+}
+async function apiUpload(p,formData){
+  const h={};if(TOKEN)h.Authorization='Bearer '+TOKEN;
+  const r=await fetch(API+p,{method:'POST',headers:h,body:formData});const d=await r.json();
+  if(!r.ok)throw new Error(d.error||'Ошибка');return d;
+}
+function $(id){return document.getElementById(id)}
+function $v(id){return $(id).value}
+function fd(d){return d?new Date(d).toLocaleDateString('ru-RU'):'—'}
+function openModal(h){$('modal-body').innerHTML=h;$('modal-overlay').classList.add('open')}
+function closeModal(){$('modal-overlay').classList.remove('open')}
+function vo(sel){return VENUES.map(v=>`<option value="${v.id}"${v.id===sel?' selected':''}>${v.name}</option>`).join('')}
+
+// ── Auth tabs ──
+function switchTab(t){
+  $('tab-login').classList.toggle('active',t==='login');
+  $('tab-register').classList.toggle('active',t==='register');
+  $('form-login').style.display=t==='login'?'block':'none';
+  $('form-register').style.display=t==='register'?'block':'none';
+  $('login-error').textContent='';
+}
+
+async function doLogin(){
+  const err=$('login-error');err.textContent='';
+  try{
+    const{token,user}=await apiFetch('/api/auth/login',{method:'POST',body:JSON.stringify({email:$v('l-email'),password:$v('l-pass')})});
+    TOKEN=token;USER=user;
+    try{await apiFetch('/api/admin/stats')}catch(e){TOKEN='';err.textContent='Нет прав. Войдите как admin или owner.';return}
+    ROLE=user.role;localStorage.setItem('admin_token',token);localStorage.setItem('admin_user',JSON.stringify(user));
+    showApp();
+  }catch(e){err.textContent=e.message}
+}
+
+async function doRegister(){
+  const err=$('login-error');err.textContent='';
+  try{
+    const{token,user}=await apiFetch('/api/auth/register-owner',{method:'POST',body:JSON.stringify({
+      name:$v('r-name'),business_name:$v('r-biz'),email:$v('r-email'),password:$v('r-pass')
+    })});
+    TOKEN=token;USER=user;ROLE=user.role;
+    localStorage.setItem('admin_token',token);localStorage.setItem('admin_user',JSON.stringify(user));
+    showApp();
+  }catch(e){err.textContent=e.message}
+}
+
+function doLogout(){TOKEN='';USER=null;localStorage.removeItem('admin_token');localStorage.removeItem('admin_user');$('app').style.display='none';$('login-screen').style.display='flex'}
+
+function showApp(){
+  ROLE=USER?.role||'user';
+  $('login-screen').style.display='none';$('app').style.display='block';
+  $('admin-name').textContent=USER?.name||'Admin';$('admin-email').textContent=USER?.email||'';$('admin-role').textContent=ROLE==='admin'?'Администратор':'Владелец бизнеса';
+  buildNav();goTo('dashboard');connectWS();
+}
+
+const NAV=[
+  {id:'dashboard',icon:'📊',label:'Дашборд',r:'ao'},
+  {id:'venues',icon:'🏠',label:'Заведения',r:'ao'},
+  {id:'services',icon:'⚙️',label:'Услуги',r:'ao'},
+  {id:'masters',icon:'👥',label:'Персонал',r:'ao'},
+  {id:'bookings',icon:'📅',label:'Брони',r:'ao'},
+  {id:'reviews',icon:'⭐',label:'Отзывы',r:'ao'},
+  {id:'promotions',icon:'🏷️',label:'Акции',r:'ao'},
+  {id:'photos',icon:'🖼️',label:'Фото',r:'ao'},
+  {id:'users',icon:'👤',label:'Пользователи',r:'a'},
+  {id:'notify',icon:'🔔',label:'Рассылка',r:'a'},
+];
+function buildNav(){$('nav').innerHTML=NAV.filter(n=>n.r.includes(ROLE[0])).map(n=>`<div class="nav-item" data-page="${n.id}" onclick="goTo('${n.id}')">${n.icon} ${n.label}</div>`).join('')}
+function goTo(p){document.querySelectorAll('.nav-item').forEach(e=>e.classList.toggle('active',e.dataset.page===p));window['page_'+p]?.()}
+
+// ── DASHBOARD ──
+async function page_dashboard(){
+  const m=$('mc');m.innerHTML='<h1 class="page-title">Дашборд</h1><div class="stats-grid" id="stats"></div><div class="table-wrap"><div class="table-header"><h3>Последние бронирования</h3></div><table><thead><tr><th>Клиент</th><th>Заведение</th><th>Дата</th><th>Время</th><th>Статус</th></tr></thead><tbody id="recent"></tbody></table></div>';
+  try{
+    const s=await apiFetch('/api/admin/stats');VENUES=await apiFetch('/api/admin/venues');
+    const sb=s=>s==='upcoming'?'badge-blue':s==='completed'?'badge-green':'badge-red';
+    $('stats').innerHTML=`<div class="stat-card"><div class="label">Заведения</div><div class="value" style="color:var(--accent2)">${s.venues}</div></div>${ROLE==='admin'?`<div class="stat-card"><div class="label">Пользователи</div><div class="value" style="color:var(--green)">${s.users}</div></div>`:''}<div class="stat-card"><div class="label">Брони</div><div class="value" style="color:var(--orange)">${s.bookings}</div></div><div class="stat-card"><div class="label">Отзывы</div><div class="value">${s.reviews}</div></div><div class="stat-card"><div class="label">Услуги</div><div class="value" style="color:var(--accent2)">${s.services}</div></div><div class="stat-card"><div class="label">Персонал</div><div class="value" style="color:var(--green)">${s.masters}</div></div>`;
+    $('recent').innerHTML=s.recentBookings.map(b=>`<tr><td>${b.user_name}<br><small style="color:var(--text3)">${b.user_email}</small></td><td>${b.venue_name}</td><td>${fd(b.date)}</td><td>${b.time}</td><td><span class="badge ${sb(b.status)}">${b.status}</span></td></tr>`).join('')||'<tr><td colspan="5" class="empty-msg">Нет данных</td></tr>';
+  }catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+
+// ── VENUES ── (with photo upload instead of URL)
+async function page_venues(){
+  const m=$('mc');m.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px"><h1 class="page-title" style="margin:0">Заведения</h1><button class="btn btn-primary" onclick="venueForm()">+ Добавить</button></div><div class="table-wrap"><table><thead><tr><th>Фото</th><th>Название</th><th>Категория</th><th>Локация</th><th>Рейтинг</th><th>Действия</th></tr></thead><tbody id="vb"></tbody></table></div>';
+  try{
+    VENUES=await apiFetch('/api/admin/venues');
+    $('vb').innerHTML=VENUES.map(v=>`<tr><td>${v.image_url?`<img class="thumb" src="${v.image_url}">`:'—'}</td><td><strong>${v.name}</strong></td><td><span class="badge badge-blue">${v.category}</span></td><td>${v.location}</td><td>⭐ ${v.rating} (${v.review_count})</td><td class="actions"><button class="btn btn-outline btn-sm" onclick='venueForm(${JSON.stringify(v).replace(/'/g,"&#39;")})'>✏️</button><button class="btn btn-danger btn-sm" onclick="venueDel('${v.id}')">🗑</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty-msg">Нет заведений</td></tr>';
+  }catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+function venueForm(v){
+  const e=!!v;
+  openModal(`<h2>${e?'Редактировать':'Новое заведение'}</h2>
+  <div class="form-row"><div class="form-group"><label>Название</label><input id="v-name" value="${v?.name||''}"></div><div class="form-group"><label>Категория</label><input id="v-cat" value="${v?.category||''}" placeholder="Billiards, Bowling..."></div></div>
+  <div class="form-row"><div class="form-group"><label>Локация</label><input id="v-loc" value="${v?.location||''}"></div><div class="form-group"><label>Ценовой диапазон</label><input id="v-price" value="${v?.price_range||'₸₸'}"></div></div>
+  <div class="form-group"><label>Описание</label><textarea id="v-desc">${v?.description||''}</textarea></div>
+  <div class="form-group"><label>📷 Фото заведения</label><input type="file" id="v-photo" accept="image/*">${v?.image_url?`<img class="img-preview" src="${v.image_url}">`:''}</div>
+  <div class="form-row"><div class="form-group"><label>Широта</label><input id="v-lat" type="number" step="any" value="${v?.latitude||43.24}"></div><div class="form-group"><label>Долгота</label><input id="v-lng" type="number" step="any" value="${v?.longitude||76.89}"></div></div>
+  <div class="form-row"><div class="form-group"><label>Открытие</label><input id="v-open" value="${v?.open_time||'10:00'}"></div><div class="form-group"><label>Закрытие</label><input id="v-close" value="${v?.close_time||'02:00'}"></div></div>
+  <div class="form-row"><div class="form-group"><label>Телефон</label><input id="v-phone" value="${v?.phone||''}"></div><div class="form-group"><label>Удобства (запятая)</label><input id="v-amen" value="${(v?.amenities||[]).join(', ')}"></div></div>
+  <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Отмена</button><button class="btn btn-primary" onclick="venueSave('${v?.id||''}')">${e?'Сохранить':'Создать'}</button></div>`);
+}
+async function venueSave(id){
+  const data={name:$v('v-name'),category:$v('v-cat'),location:$v('v-loc'),price_range:$v('v-price'),description:$v('v-desc'),latitude:+$v('v-lat'),longitude:+$v('v-lng'),open_time:$v('v-open'),close_time:$v('v-close'),phone:$v('v-phone'),amenities:$v('v-amen').split(',').map(s=>s.trim()).filter(Boolean)};
+  try{
+    let venue;
+    if(id){venue=(await apiFetch('/api/admin/venues/'+id,{method:'PUT',body:JSON.stringify(data)}));}
+    else{venue=(await apiFetch('/api/admin/venues',{method:'POST',body:JSON.stringify(data)}));}
+    // Upload photo if selected
+    const fileInput=$('v-photo');
+    if(fileInput.files.length>0){
+      const fd=new FormData();fd.append('photo',fileInput.files[0]);
+      await apiUpload('/api/photos/venue-main/'+(id||venue.id),fd);
+    }
+    closeModal();page_venues();
+  }catch(e){alert(e.message)}
+}
+async function venueDel(id){if(!confirm('Удалить заведение?'))return;try{await apiFetch('/api/admin/venues/'+id,{method:'DELETE'});page_venues()}catch(e){alert(e.message)}}
+
+// ── SERVICES ──
+async function page_services(){
+  const m=$('mc');m.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px"><h1 class="page-title" style="margin:0">Услуги</h1><button class="btn btn-primary" onclick="serviceForm()">+ Добавить</button></div><div class="table-wrap"><table><thead><tr><th>Заведение</th><th>Название</th><th>Цена</th><th>Длит.</th><th>Действия</th></tr></thead><tbody id="sb"></tbody></table></div>';
+  try{const l=await apiFetch('/api/admin/services');$('sb').innerHTML=l.map(s=>`<tr><td>${s.venue_name}</td><td><strong>${s.name}</strong>${s.description?'<br><small style="color:var(--text3)">'+s.description+'</small>':''}</td><td>${s.price?.toLocaleString()} ₸</td><td>${s.duration} мин</td><td class="actions"><button class="btn btn-outline btn-sm" onclick='serviceForm(${JSON.stringify(s).replace(/'/g,"&#39;")})'>✏️</button><button class="btn btn-danger btn-sm" onclick="serviceDel('${s.id}')">🗑</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty-msg">Нет</td></tr>'}catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+function serviceForm(s){const e=!!s;openModal(`<h2>${e?'Редактировать':'Новая услуга'}</h2><div class="form-group"><label>Заведение</label><select id="s-v">${vo(s?.venue_id)}</select></div><div class="form-group"><label>Название</label><input id="s-n" value="${s?.name||''}"></div><div class="form-group"><label>Описание</label><textarea id="s-d">${s?.description||''}</textarea></div><div class="form-row"><div class="form-group"><label>Цена (₸)</label><input id="s-p" type="number" value="${s?.price||0}"></div><div class="form-group"><label>Длительность (мин)</label><input id="s-du" type="number" value="${s?.duration||60}"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Отмена</button><button class="btn btn-primary" onclick="serviceSave('${s?.id||''}')">${e?'Сохранить':'Создать'}</button></div>`)}
+async function serviceSave(id){const d={venue_id:$v('s-v'),name:$v('s-n'),description:$v('s-d'),price:+$v('s-p'),duration:+$v('s-du')};try{if(id)await apiFetch('/api/admin/services/'+id,{method:'PUT',body:JSON.stringify(d)});else await apiFetch('/api/admin/services',{method:'POST',body:JSON.stringify(d)});closeModal();page_services()}catch(e){alert(e.message)}}
+async function serviceDel(id){if(!confirm('Удалить?'))return;try{await apiFetch('/api/admin/services/'+id,{method:'DELETE'});page_services()}catch(e){alert(e.message)}}
+
+// ── MASTERS ──
+async function page_masters(){
+  const m=$('mc');m.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px"><h1 class="page-title" style="margin:0">Персонал</h1><button class="btn btn-primary" onclick="masterForm()">+ Добавить</button></div><div class="table-wrap"><table><thead><tr><th></th><th>Имя</th><th>Роль</th><th>Заведение</th><th>Тел.</th><th>Действия</th></tr></thead><tbody id="mb2"></tbody></table></div>';
+  try{const l=await apiFetch('/api/admin/masters');$('mb2').innerHTML=l.map(m=>`<tr><td>${m.avatar_url?`<img class="thumb" src="${m.avatar_url}">`:'👤'}</td><td><strong>${m.name}</strong></td><td>${m.role||'—'}</td><td>${m.venue_name}</td><td>${m.phone||'—'}</td><td class="actions"><button class="btn btn-outline btn-sm" onclick='masterForm(${JSON.stringify(m).replace(/'/g,"&#39;")})'>✏️</button><button class="btn btn-danger btn-sm" onclick="masterDel('${m.id}')">🗑</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty-msg">Нет</td></tr>'}catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+function masterForm(m){const e=!!m;openModal(`<h2>${e?'Редактировать':'Новый сотрудник'}</h2><div class="form-group"><label>Заведение</label><select id="m-v">${vo(m?.venue_id)}</select></div><div class="form-row"><div class="form-group"><label>Имя</label><input id="m-n" value="${m?.name||''}"></div><div class="form-group"><label>Должность</label><input id="m-r" value="${m?.role||''}"></div></div><div class="form-group"><label>Описание</label><textarea id="m-b">${m?.bio||''}</textarea></div><div class="form-row"><div class="form-group"><label>Фото URL</label><input id="m-a" value="${m?.avatar_url||''}"></div><div class="form-group"><label>Телефон</label><input id="m-p" value="${m?.phone||''}"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Отмена</button><button class="btn btn-primary" onclick="masterSave('${m?.id||''}')">${e?'Сохранить':'Создать'}</button></div>`)}
+async function masterSave(id){const d={venue_id:$v('m-v'),name:$v('m-n'),role:$v('m-r'),bio:$v('m-b'),avatar_url:$v('m-a'),phone:$v('m-p')};try{if(id)await apiFetch('/api/admin/masters/'+id,{method:'PUT',body:JSON.stringify(d)});else await apiFetch('/api/admin/masters',{method:'POST',body:JSON.stringify(d)});closeModal();page_masters()}catch(e){alert(e.message)}}
+async function masterDel(id){if(!confirm('Удалить?'))return;try{await apiFetch('/api/admin/masters/'+id,{method:'DELETE'});page_masters()}catch(e){alert(e.message)}}
+
+// ── BOOKINGS ──
+async function page_bookings(){
+  const m=$('mc');m.innerHTML='<h1 class="page-title">Бронирования</h1><div class="table-wrap"><table><thead><tr><th>Клиент</th><th>Email</th><th>Заведение</th><th>Дата</th><th>Время</th><th>Гости</th><th>Статус</th><th>Действия</th></tr></thead><tbody id="bb"></tbody></table></div>';
+  try{const l=await apiFetch('/api/admin/bookings');const sb=s=>s==='upcoming'?'badge-blue':s==='completed'?'badge-green':'badge-red';$('bb').innerHTML=l.map(b=>`<tr><td>${b.user_name}</td><td style="color:var(--text3)">${b.user_email}</td><td>${b.venue_name}</td><td>${fd(b.date)}</td><td>${b.time}</td><td>${b.guests}</td><td><span class="badge ${sb(b.status)}">${b.status}</span></td><td class="actions">${b.status==='upcoming'?`<button class="btn btn-sm badge-green" onclick="bookUpd('${b.id}','completed')">✓</button><button class="btn btn-danger btn-sm" onclick="bookUpd('${b.id}','cancelled')">✕</button>`:'—'}</td></tr>`).join('')||'<tr><td colspan="8" class="empty-msg">Нет</td></tr>'}catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+async function bookUpd(id,s){try{await apiFetch('/api/admin/bookings/'+id,{method:'PATCH',body:JSON.stringify({status:s})});page_bookings()}catch(e){alert(e.message)}}
+
+// ── REVIEWS ──
+async function page_reviews(){
+  const m=$('mc');m.innerHTML='<h1 class="page-title">Отзывы</h1><div class="table-wrap"><table><thead><tr><th>Пользователь</th><th>Заведение</th><th>Рейтинг</th><th>Текст</th><th>Дата</th><th></th></tr></thead><tbody id="rvb"></tbody></table></div>';
+  try{const l=await apiFetch('/api/admin/reviews');$('rvb').innerHTML=l.map(r=>`<tr><td>${r.user_name}</td><td>${r.venue_name}</td><td>${'⭐'.repeat(r.rating)}</td><td style="max-width:300px">${r.comment||'—'}</td><td>${fd(r.created_at)}</td><td><button class="btn btn-danger btn-sm" onclick="revDel('${r.id}')">🗑</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty-msg">Нет</td></tr>'}catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+async function revDel(id){if(!confirm('Удалить?'))return;try{await apiFetch('/api/admin/reviews/'+id,{method:'DELETE'});page_reviews()}catch(e){alert(e.message)}}
+
+// ── PROMOTIONS ──
+async function page_promotions(){
+  const m=$('mc');m.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px"><h1 class="page-title" style="margin:0">Акции</h1><button class="btn btn-primary" onclick="promoForm()">+ Создать акцию</button></div><div class="table-wrap"><table><thead><tr><th>Заведение</th><th>Название</th><th>Скидка</th><th>Период</th><th>Действия</th></tr></thead><tbody id="pb"></tbody></table></div>';
+  try{const l=await apiFetch('/api/admin/promotions');$('pb').innerHTML=l.map(p=>`<tr><td>${p.venue_name}</td><td><strong>${p.title}</strong></td><td><span class="badge badge-orange">${p.discount}%</span></td><td>${fd(p.start_date)} — ${fd(p.end_date)}</td><td class="actions"><button class="btn btn-outline btn-sm" onclick='promoForm(${JSON.stringify(p).replace(/'/g,"&#39;")})'>✏️</button><button class="btn btn-danger btn-sm" onclick="promoDel('${p.id}')">🗑</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty-msg">Нет</td></tr>'}catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+function promoForm(p){const e=!!p;openModal(`<h2>${e?'Редактировать':'Новая акция'}</h2><div class="form-group"><label>Заведение</label><select id="p-v">${vo(p?.venue_id)}</select></div><div class="form-group"><label>Название</label><input id="p-t" value="${p?.title||''}"></div><div class="form-group"><label>Описание</label><textarea id="p-d">${p?.description||''}</textarea></div><div class="form-row"><div class="form-group"><label>Скидка (%)</label><input id="p-dc" type="number" value="${p?.discount||10}"></div><div class="form-group"><label>Начало</label><input id="p-s" type="date" value="${p?.start_date?.split('T')[0]||''}"></div></div><div class="form-group"><label>Конец</label><input id="p-e" type="date" value="${p?.end_date?.split('T')[0]||''}"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal()">Отмена</button><button class="btn btn-primary" onclick="promoSave('${p?.id||''}')">${e?'Сохранить':'Создать'}</button></div>`)}
+async function promoSave(id){const d={venue_id:$v('p-v'),title:$v('p-t'),description:$v('p-d'),discount:+$v('p-dc'),start_date:$v('p-s')||null,end_date:$v('p-e')||null};try{if(id)await apiFetch('/api/admin/promotions/'+id,{method:'PUT',body:JSON.stringify(d)});else await apiFetch('/api/admin/promotions',{method:'POST',body:JSON.stringify(d)});closeModal();page_promotions()}catch(e){alert(e.message)}}
+async function promoDel(id){if(!confirm('Удалить?'))return;try{await apiFetch('/api/admin/promotions/'+id,{method:'DELETE'});page_promotions()}catch(e){alert(e.message)}}
+
+// ── PHOTOS ──
+async function page_photos(){
+  const m=$('mc');m.innerHTML='<h1 class="page-title">Фото заведений</h1><div id="photo-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px"></div>';
+  try{const l=await apiFetch('/api/admin/photos');$('photo-grid').innerHTML=l.map(p=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden"><img src="${p.url}" style="width:100%;height:150px;object-fit:cover"><div style="padding:12px"><div style="font-size:13px;color:var(--text2);margin-bottom:8px">${p.venue_name}</div><button class="btn btn-danger btn-sm" onclick="photoDel('${p.id}')">Удалить</button></div></div>`).join('')||'<p class="empty-msg">Нет фото</p>'}catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+async function photoDel(id){if(!confirm('Удалить?'))return;try{await apiFetch('/api/admin/photos/'+id,{method:'DELETE'});page_photos()}catch(e){alert(e.message)}}
+
+// ── USERS (admin only) ──
+async function page_users(){
+  const m=$('mc');m.innerHTML='<h1 class="page-title">Пользователи</h1><div class="table-wrap"><table><thead><tr><th>Имя</th><th>Email</th><th>Роль</th><th>Регистрация</th><th>Действия</th></tr></thead><tbody id="ub"></tbody></table></div>';
+  try{const l=await apiFetch('/api/admin/users');$('ub').innerHTML=l.map(u=>`<tr><td><strong>${u.name||'—'}</strong></td><td>${u.email}</td><td><span class="badge ${u.role==='admin'?'badge-orange':u.role==='owner'?'badge-blue':'badge-green'}">${u.role}</span></td><td>${fd(u.created_at)}</td><td><select onchange="setRole('${u.id}',this.value)" style="background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:12px"><option value="user"${u.role==='user'?' selected':''}>user</option><option value="owner"${u.role==='owner'?' selected':''}>owner</option><option value="admin"${u.role==='admin'?' selected':''}>admin</option></select></td></tr>`).join('')}catch(e){m.innerHTML+=`<p style="color:var(--red)">${e.message}</p>`}
+}
+async function setRole(id,r){try{await apiFetch('/api/admin/users/'+id+'/role',{method:'PATCH',body:JSON.stringify({role:r})});page_users()}catch(e){alert(e.message)}}
+
+// ── NOTIFY ──
+function page_notify(){$('mc').innerHTML=`<h1 class="page-title">Рассылка уведомлений</h1><div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:600px"><div class="form-group"><label>Тип</label><select id="n-type"><option value="offer">Акция</option><option value="booking">Бронирование</option><option value="venue">Заведение</option></select></div><div class="form-group"><label>Заголовок</label><input id="n-title" placeholder="Заголовок..."></div><div class="form-group"><label>Сообщение</label><textarea id="n-msg" placeholder="Текст..."></textarea></div><button class="btn btn-primary" onclick="sendNotify()">Отправить всем</button><div id="n-result" style="margin-top:12px;font-size:14px"></div></div>`}
+async function sendNotify(){try{const r=await apiFetch('/api/admin/notify-all',{method:'POST',body:JSON.stringify({type:$v('n-type'),title:$v('n-title'),message:$v('n-msg')})});$('n-result').innerHTML=`<span style="color:var(--green)">✓ Отправлено ${r.sent} пользователям</span>`}catch(e){$('n-result').innerHTML=`<span style="color:var(--red)">${e.message}</span>`}}
+
+// ── WebSocket ──
+function connectWS(){try{const w=new WebSocket((location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'/ws');w.onmessage=()=>{const a=document.querySelector('.nav-item.active');if(a)window['page_'+a.dataset.page]?.()};w.onclose=()=>setTimeout(connectWS,3000)}catch{}}
+
+// ── Init ──
+(async()=>{if(TOKEN){try{await apiFetch('/api/admin/stats');showApp()}catch{doLogout()}}})();
+</script>
+</body>
+</html>

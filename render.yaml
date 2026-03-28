@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: bookmate-api
+    runtime: node
+    buildCommand: npm install && npm run db:init
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
